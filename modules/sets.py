@@ -6,10 +6,19 @@ from datetime import datetime
 import re
 
 # ========== CONFIGURAÇÃO ==========
+# CORRIGIDO: Adicionadas vírgulas entre os cargos
 STAFF_ROLES = [
-    "👑┃OWNER", "👑┃CEO", "👑┃Real XIT", 
-    "👤┃GERENTE", "👤┃RESP. ELITE", 
-    "🎫┃RESP. E-MAIL"
+    "👑┃OWNER",                    # Vírgula adicionada
+    "👑┃LIDERANÇA",                # Vírgula adicionada
+    "👑┃CEO",                      # Vírgula adicionada
+    "🔑┃ACESS",                    # Vírgula adicionada
+    "👑┃Real XIT",                 # Vírgula adicionada
+    "👤┃GERENTE",                  # Vírgula adicionada
+    "👤┃RESP. ELITE",              # Vírgula adicionada
+    "📍┃RESP. CALL",               # Vírgula adicionada
+    "📍┃RESP. TICKET",             # Vírgula adicionada
+    "🎫┃RESP. E-MAIL",             # Vírgula adicionada
+    "👨‍💻┃RESP. REC"                 # Corrigido o emoji
 ]
 
 # ========== CLASSES DO SISTEMA DE SET ==========
@@ -130,16 +139,29 @@ class SetStaffView(ui.View):
             print(f"✅ Nickname alterado para: {novo_nick}")
             
             # 3. Remover cargo de visitante
+            # Primeiro tenta com emoji, depois sem
             visitante_role = discord.utils.get(interaction.guild.roles, name="⏳┃Team REALXIT")
+            if not visitante_role:
+                visitante_role = discord.utils.get(interaction.guild.roles, name="Team REALXIT")
+            
             if visitante_role and visitante_role in member.roles:
                 await member.remove_roles(visitante_role)
-                print(f"✅ Cargo '⏳┃Team REALXIT' removido de {member.name}")
+                print(f"✅ Cargo 'Team REALXIT' removido de {member.name}")
             
             # 4. Dar cargo de membro
+            # Primeiro tenta com emoji, depois sem
             membro_role = discord.utils.get(interaction.guild.roles, name="🫂┃Membro")
+            if not membro_role:
+                membro_role = discord.utils.get(interaction.guild.roles, name="Membro")
+            
             if membro_role:
                 await member.add_roles(membro_role)
-                print(f"✅ Cargo '🫂┃Membro' adicionado a {member.name}")
+                print(f"✅ Cargo 'Membro' adicionado a {member.name}")
+            else:
+                await interaction.followup.send(
+                    "⚠️ Cargo 'Membro' não encontrado! Apenas o nickname foi alterado.",
+                    ephemeral=True
+                )
             
             # Embed de aprovação
             embed_aprovado = discord.Embed(
@@ -151,13 +173,13 @@ class SetStaffView(ui.View):
                     f"**👑 Aprovado por:** {interaction.user.mention}\n"
                     f"**📅 Data:** {datetime.now().strftime('%d/%m/%Y %H:%M')}\n\n"
                     f"✅ **Nickname alterado para:** `{novo_nick}`\n"
-                    f"✅ **Cargo atualizado:** 🫂┃Membro"
+                    f"✅ **Cargo atualizado:** Membro"
                 ),
                 color=discord.Color.green()
             )
             
             if visitante_role and visitante_role in member.roles:
-                embed_aprovado.description += f"\n✅ **Cargo removido:** ⏳┃Team REALXIT"
+                embed_aprovado.description += f"\n✅ **Cargo removido:** Team REALXIT"
             
             # Remover botões
             self.clear_items()
@@ -171,7 +193,7 @@ class SetStaffView(ui.View):
             await interaction.followup.send(
                 f"✅ Set de {member.mention} aprovado!\n"
                 f"• Nickname: `{novo_nick}`\n"
-                f"• Cargo: 🫂┃Membro",
+                f"• Cargo: Membro",
                 ephemeral=True
             )
             
@@ -184,7 +206,7 @@ class SetStaffView(ui.View):
                         f"**📋 Detalhes:**\n"
                         f"• **Nickname:** `{novo_nick}`\n"
                         f"• **ID Fivem:** `{self.fivem_id}`\n"
-                        f"• **Cargo:** 🫂┃Membro\n\n"
+                        f"• **Cargo:** Membro\n\n"
                         f"🎮 Bem-vindo ao servidor!"
                     ),
                     color=discord.Color.green()
@@ -285,15 +307,29 @@ class SetForm(ui.Modal, title="📝 Pedido de Set"):
             
             # Encontrar canal de aprovação
             canal_aprovamento = discord.utils.get(interaction.guild.text_channels, name="aprovar-set")
+            
             if not canal_aprovamento:
-                await interaction.followup.send("❌ Canal #aprovar-set não encontrado!", ephemeral=True)
+                # Se não encontrar, procurar canais similares
+                for channel in interaction.guild.text_channels:
+                    if "aprovar" in channel.name.lower() or "set" in channel.name.lower():
+                        canal_aprovamento = channel
+                        break
+            
+            if not canal_aprovamento:
+                await interaction.followup.send(
+                    "❌ Canal de aprovação não encontrado!\n"
+                    "Crie um canal chamado **'aprovar-set'**",
+                    ephemeral=True
+                )
                 return
             
             # Verificar se ID já existe
-            async for message in canal_aprovamento.history(limit=100):
-                if message.embeds and f"**🎮 ID Fivem:** `{self.fivem_id.value}`" in (message.embeds[0].description or ""):
-                    await interaction.followup.send(f"❌ ID `{self.fivem_id.value}` já em uso!", ephemeral=True)
-                    return
+            async for message in canal_aprovamento.history(limit=200):
+                if message.embeds:
+                    for embed in message.embeds:
+                        if embed.description and f"**🎮 ID Fivem:** `{self.fivem_id.value}`" in embed.description:
+                            await interaction.followup.send(f"❌ ID `{self.fivem_id.value}` já está em uso!", ephemeral=True)
+                            return
             
             # Criar embed
             embed = discord.Embed(
@@ -315,7 +351,8 @@ class SetForm(ui.Modal, title="📝 Pedido de Set"):
             
             # Confirmação
             success_msg = await interaction.followup.send(
-                f"✅ **Pedido enviado!**\nID: `{self.fivem_id.value}`\nNick: `{self.game_nick.value}`",
+                f"✅ **Pedido enviado!**\nID: `{self.fivem_id.value}`\nNick: `{self.game_nick.value}`\n\n"
+                f"📋 **Enviado para:** {canal_aprovamento.mention}",
                 ephemeral=True
             )
             await asyncio.sleep(10)
@@ -341,10 +378,37 @@ class SetsCog(commands.Cog):
         self.bot = bot
         print("✅ Módulo Sets carregado!")
     
+    @commands.Cog.listener()
+    async def on_ready(self):
+        """Carrega views persistentes"""
+        self.bot.add_view(SetOpenView())
+        self.bot.add_view(SetFinalizadoView("", "", 0))
+        print("✅ Views de Sets carregadas")
+    
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def setup_set(self, ctx):
         """Configura o painel de pedido de set"""
+        
+        # Verificar se canal 'aprovar-set' existe
+        canal_set = discord.utils.get(ctx.guild.text_channels, name="aprovar-set")
+        if not canal_set:
+            embed_aviso = discord.Embed(
+                title="⚠️ ATENÇÃO!",
+                description=(
+                    "O canal **'aprovar-set'** não existe!\n\n"
+                    "**Para criar:**\n"
+                    "1. Crie um canal de texto chamado `aprovar-set`\n"
+                    "2. Configure as permissões para staff\n"
+                    "3. Execute `!setup_set` novamente\n\n"
+                    "**Permissões recomendadas:**\n"
+                    "• Staff: Ver e enviar mensagens\n"
+                    "• Demais: Apenas ver mensagens"
+                ),
+                color=discord.Color.orange()
+            )
+            await ctx.send(embed=embed_aviso)
+            return
         
         embed = discord.Embed(
             title="🎮 **PEÇA SEU SET AQUI!**",
@@ -357,11 +421,11 @@ class SetsCog(commands.Cog):
                 "2. Digite seu **ID do Fivem**\n"
                 "3. Digite seu **Nick do Jogo**\n"
                 "4. Aguarde aprovação da equipe\n\n"
+                f"**📋 Pedidos serão enviados para:**\n{canal_set.mention}"
             ),
             color=discord.Color.purple()
         )
         
-        embed.set_image(url="https://cdn.discordapp.com/attachments/1421981847201644635/1424930657074941983/image.png?ex=69888ed6&is=69873d56&hm=876797039575c7c96db986c770db50fd8fe8236b40f50e841fbfb9014173056f")
         embed.set_footer(text="Sistema automático • Setagem!")
         
         view = SetOpenView()
@@ -369,12 +433,11 @@ class SetsCog(commands.Cog):
         await ctx.message.delete()
     
     @commands.command()
-    @commands.has_permissions(administrator=True)
     async def check_id(self, ctx, *, fivem_id: str):
         """Verifica se um ID Fivem já está em uso"""
         canal = discord.utils.get(ctx.guild.text_channels, name="aprovar-set")
         if not canal:
-            await ctx.send("❌ Canal #aprovar-set não encontrado!")
+            await ctx.send("❌ Canal 'aprovar-set' não encontrado!")
             return
         
         if not fivem_id.isdigit():
@@ -382,10 +445,14 @@ class SetsCog(commands.Cog):
             return
         
         encontrado = False
-        async for message in canal.history(limit=100):
-            if message.embeds and f"**🎮 ID Fivem:** `{fivem_id}`" in (message.embeds[0].description or ""):
-                await ctx.send(f"❌ ID `{fivem_id}` já em uso! [Ver pedido]({message.jump_url})")
-                encontrado = True
+        async for message in canal.history(limit=200):
+            if message.embeds:
+                for embed in message.embeds:
+                    if embed.description and f"**🎮 ID Fivem:** `{fivem_id}`" in embed.description:
+                        await ctx.send(f"❌ ID `{fivem_id}` já em uso! [Ver pedido]({message.jump_url})")
+                        encontrado = True
+                        break
+            if encontrado:
                 break
         
         if not encontrado:
@@ -397,13 +464,16 @@ class SetsCog(commands.Cog):
         """Mostra pedidos pendentes"""
         canal = discord.utils.get(ctx.guild.text_channels, name="aprovar-set")
         if not canal:
-            await ctx.send("❌ Canal #aprovamento não encontrado!")
+            await ctx.send("❌ Canal 'aprovar-set' não encontrado!")
             return
         
         pedidos = []
-        async for message in canal.history(limit=50):
-            if message.embeds and "Aguardando aprovação" in (message.embeds[0].description or ""):
-                pedidos.append(message)
+        async for message in canal.history(limit=100):
+            if message.embeds:
+                for embed in message.embeds:
+                    if "Aguardando aprovação" in (embed.description or ""):
+                        pedidos.append(message)
+                        break
         
         if not pedidos:
             await ctx.send("✅ Nenhum pedido pendente!")
@@ -411,7 +481,7 @@ class SetsCog(commands.Cog):
         
         embed = discord.Embed(
             title="📋 Pedidos Pendentes",
-            description=f"Total: **{len(pedidos)}** pedidos",
+            description=f"Total: **{len(pedidos)}** pedidos\nCanal: {canal.mention}",
             color=discord.Color.blue()
         )
         
@@ -422,7 +492,18 @@ class SetsCog(commands.Cog):
             
             embed.add_field(
                 name=f"Pedido #{i}",
-                value=f"**ID:** `{id_match.group(1) if id_match else '?'}`\n**Nick:** `{nick_match.group(1) if nick_match else '?'}`",
+                value=(
+                    f"**ID:** `{id_match.group(1) if id_match else '?'}`\n"
+                    f"**Nick:** `{nick_match.group(1) if nick_match else '?'}`\n"
+                    f"[Ver pedido]({msg.jump_url})"
+                ),
+                inline=False
+            )
+        
+        if len(pedidos) > 5:
+            embed.add_field(
+                name="📊 Estatísticas",
+                value=f"Mostrando 5 de {len(pedidos)} pedidos\nUse `!check_id [ID]` para verificar um ID específico",
                 inline=False
             )
         
@@ -430,24 +511,24 @@ class SetsCog(commands.Cog):
     
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def remover_visitante(self, ctx, member: discord.Member):
-        """Remove manualmente o cargo de ⏳┃Team REALXIT"""
-        try:
-            visitante_role = discord.utils.get(ctx.guild.roles, name="⏳┃Team REALXIT")
-            if not visitante_role:
-                await ctx.send("❌ Cargo '⏳┃Team REALXIT' não encontrado!")
-                return
-            
-            if visitante_role in member.roles:
-                await member.remove_roles(visitante_role)
-                await ctx.send(f"✅ Cargo '⏳┃Team REALXIT' removido de {member.mention}")
-            else:
-                await ctx.send(f"❌ {member.mention} não possui o cargo '⏳┃Team REALXIT'")
-                
-        except discord.Forbidden:
-            await ctx.send("❌ Não tenho permissão para modificar cargos!")
-        except Exception as e:
-            await ctx.send(f"❌ Erro: {e}")
+    async def limpar_sets(self, ctx, limit: int = 50):
+        """Limpa mensagens antigas do canal aprovar-set"""
+        canal = discord.utils.get(ctx.guild.text_channels, name="aprovar-set")
+        if not canal:
+            await ctx.send("❌ Canal 'aprovar-set' não encontrado!")
+            return
+        
+        if limit > 100:
+            limit = 100
+        
+        deleted = 0
+        async for message in canal.history(limit=limit):
+            if message.author == ctx.bot.user and not message.pinned:
+                await message.delete()
+                deleted += 1
+                await asyncio.sleep(0.5)  # Evitar rate limit
+        
+        await ctx.send(f"✅ {deleted} mensagens do bot deletadas do canal {canal.mention}")
 
 async def setup(bot):
     await bot.add_cog(SetsCog(bot))
