@@ -5,40 +5,51 @@ import asyncio
 from datetime import datetime
 import re
 
-# ========== CONFIGURAÇÃO SIMPLES ==========
-NICKNAME_CONFIG = {
-    "00": "00 | {name}",
-    "𝐆𝐞𝐫𝐞𝐧𝐭𝐞": "GER | {name} - {id}",
-    "𝐒𝐮𝐛𝐥𝐢́𝐝𝐞𝐫": "SLD | {name} - {id}",
-    "𝐑𝐞𝐜𝐫𝐮𝐭𝐚𝐝𝐨𝐫": "REC | {name} - {id}",
-    "𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐄𝐥𝐢𝐭𝐞": "GER ELITE | {name} - {id}",
-    "𝐄𝐥𝐢𝐭𝐞": "ELITE | {name} - {id}",  # ADICIONADO
-    "𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐑𝐞𝐜𝐫𝐮𝐭𝐚𝐦𝐞𝐧𝐭𝐨": "GER REC | {name} - {id}",
-    "𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐝𝐞 𝐅𝐚𝐦𝐫": "GER FMR | {name}",
-    "𝐌𝐨𝐝𝐞𝐫": "MOD | {name}",
-    "𝐀𝐯𝐢𝐚̃𝐨𝐳𝐢𝐧𝐡𝐨": "AV | {name} - {id}",
-    "𝐌𝐞𝐦𝐛𝐫𝐨": "MEM | {name} - {id}",
-    "𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞": "{name}",
-    "𝐀𝐃𝐌": "ADM | {name} - {id}",
-}
-
-ORDEM_PRIORIDADE = [
-    "00", "𝐀𝐃𝐌", "𝐒𝐮𝐛𝐥𝐢́𝐝𝐞𝐫", "𝐆𝐞𝐫𝐞𝐧𝐭𝐞", "𝐑𝐞𝐜𝐫𝐮𝐭𝐚𝐝𝐨𝐫",
-    "𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐄𝐥𝐢𝐭𝐞", "𝐄𝐥𝐢𝐭𝐞",  # ADICIONADO Elite aqui
-    "𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐑𝐞𝐜𝐫𝐮𝐭𝐚𝐦𝐞𝐧𝐭𝐨", "𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐝𝐞 𝐅𝐚𝐦𝐫", 
-    "𝐌𝐨𝐝𝐞𝐫", "𝐌𝐞𝐦𝐛𝐫𝐨", "𝐀𝐯𝐢𝐚̃𝐨𝐳𝐢𝐧𝐡𝐨", "𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞"
+# ========== CONFIGURAÇÃO COM SEUS CARGOS REAIS ==========
+# ORDEM DECRESCENTE (do maior para o menor)
+ORDEM_DECRESCENTE = [
+    "👑┃OWNER",           # 1 - MAIOR
+    "👑┃CEO",             # 2
+    "👑┃Real XIT",        # 3
+    "💰┃Doações GANG $",  # 4
+    "👤┃GERENTE",         # 5
+    "👤┃RESP. ELITE",     # 6
+    "🎫┃RESP. E-MAIL",    # 7
+    "👤┃ELITE",           # 8 - LIMITE: daqui pra CIMA sem ID
+    "📸┃STREAMER",        # 9 - daqui pra BAIXO com ID
+    "🚀┃RealXit Booster", # 10
+    "🫂┃Membro",          # 11
+    "🫱🏻‍🫲🏻┃Parceiro",    # 12
+    "⏳┃Team REALXIT",     # 13
+    "👼🏻┃FILHO DO PROFESSOR"  # 14 - MENOR
 ]
 
-# Cargos de staff (Elite NÃO está aqui - como solicitado)
+# Templates de nickname
+NICKNAME_TEMPLATES = {
+    # CARGOS ACIMA DE "👤┃ELITE" (SEM ID)
+    "👑┃OWNER": "OWNER | {name}",
+    "👑┃CEO": "CEO | {name}",
+    "👑┃Real XIT": "Real XIT | {name}",
+    "💰┃Doações GANG $": "DOAÇÃO | {name}",
+    "👤┃GERENTE": "GER | {name}",
+    "👤┃RESP. ELITE": "RESP ELITE | {name}",
+    "🎫┃RESP. E-MAIL": "EMAIL | {name}",
+    "👤┃ELITE": "ELITE | {name}",
+    
+    # CARGOS ABAIXO DE "👤┃ELITE" (COM ID)
+    "📸┃STREAMER": "STREAM | {name} - {id}",
+    "🚀┃RealXit Booster": "BOOSTER | {name} - {id}",
+    "🫂┃Membro": "MEM | {name} - {id}",
+    "🫱🏻‍🫲🏻┃Parceiro": "PARCEIRO | {name} - {id}",
+    "⏳┃Team REALXIT": "TEAM | {name} - {id}",
+    "👼🏻┃FILHO DO PROFESSOR": "FILHO | {name} - {id}",
+}
+
+# Cargos que podem usar o sistema (staff)
 STAFF_ROLES = [
-    ":crown:┃OWNER", ":crown:┃LIDERANÇA", 
-    ":crown:┃CEO", ":key:┃ACESS", ":crown:┃Real XIT", 
-    ":bust_in_silhouette:┃GERENTE", 
-    ":bust_in_silhouette:┃RESP. ELITE", 
-    ":round_pushpin:┃RESP. CALL", 
-    ":round_pushpin:┃RESP. TICKET", 
-    ":ticket:┃RESP. E-MAIL", 
-    ":man_technologist:┃RESP. REC"
+    "👑┃OWNER", "👑┃CEO", "👑┃Real XIT", 
+    "💰┃Doações GANG $", "👤┃GERENTE", 
+    "👤┃RESP. ELITE", "🎫┃RESP. E-MAIL"
 ]
 
 # ========== FUNÇÕES AUXILIARES ==========
@@ -100,8 +111,19 @@ def extrair_id_fivem(nickname: str):
     
     return None
 
+def deve_usar_id_fivem(cargo_nome: str) -> bool:
+    """Verifica se o cargo deve usar ID do FiveM no nickname"""
+    try:
+        index_elite = ORDEM_DECRESCENTE.index("👤┃ELITE")
+        index_cargo = ORDEM_DECRESCENTE.index(cargo_nome)
+        
+        # Se o cargo está ABAIXO de Elite na lista, usa ID
+        return index_cargo > index_elite
+    except ValueError:
+        return False  # Se não encontrar o cargo, não usa ID
+
 async def atualizar_nickname(member: discord.Member):
-    """Atualiza nickname mantendo a primeira parte fixa"""
+    """Atualiza nickname seguindo as regras específicas"""
     try:
         # Verificar permissões
         if not member.guild.me.guild_permissions.manage_nicknames:
@@ -112,27 +134,27 @@ async def atualizar_nickname(member: discord.Member):
         parte_nome = extrair_parte_nickname(nickname_atual)
         id_fivem = extrair_id_fivem(nickname_atual)
         
-        # Encontrar cargo principal
+        # Encontrar cargo principal (mais alto na hierarquia)
         cargo_principal = None
-        for cargo_nome in ORDEM_PRIORIDADE:
+        for cargo_nome in ORDEM_DECRESCENTE:
             if discord.utils.get(member.roles, name=cargo_nome):
                 cargo_principal = cargo_nome
                 break
         
-        if not cargo_principal or cargo_principal not in NICKNAME_CONFIG:
+        if not cargo_principal or cargo_principal not in NICKNAME_TEMPLATES:
             return False
         
         # Gerar novo nickname
-        template = NICKNAME_CONFIG[cargo_principal]
+        template = NICKNAME_TEMPLATES[cargo_principal]
         
-        # Se o template não precisa de ID, usar versão sem ID
-        if '{id}' not in template:
-            novo_nick = template.format(name=parte_nome)
-        else:
-            # Se precisa de ID mas não tem, usar placeholder
+        if deve_usar_id_fivem(cargo_principal):
+            # Precisa de ID do FiveM
             if not id_fivem:
-                id_fivem = "000000"
+                id_fivem = "000000"  # Placeholder se não tiver
             novo_nick = template.format(name=parte_nome, id=id_fivem)
+        else:
+            # Não usa ID do FiveM
+            novo_nick = template.format(name=parte_nome)
         
         # Limitar a 32 caracteres
         if len(novo_nick) > 32:
@@ -141,10 +163,11 @@ async def atualizar_nickname(member: discord.Member):
         # Aplicar se for diferente
         if member.nick != novo_nick:
             await member.edit(nick=novo_nick)
+            print(f"✅ Nickname atualizado: {member.name} -> {novo_nick}")
             return True
             
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"❌ Erro ao atualizar nickname: {e}")
     
     return False
 
@@ -156,30 +179,30 @@ class CargoSelectView(ui.View):
         self.member = member
         self.action = action  # "add" ou "remove"
         
-        # Opções de cargo SEM EMOJIS (para evitar erro)
+        # Opções de cargo (seus cargos reais)
         options = []
         cargos_disponiveis = [
-            ("00", "Dono"),
-            ("𝐀𝐃𝐌", "Administrador"),
-            ("𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐄𝐥𝐢𝐭𝐞", "Gerente Elite"),
-            ("𝐆𝐞𝐫𝐞𝐧𝐭𝐞", "Gerente"),
-            ("𝐒𝐮𝐛𝐥𝐢́𝐝𝐞𝐫", "Sublíder"),
-            ("𝐑𝐞𝐜𝐫𝐮𝐭𝐚𝐝𝐨𝐫", "Recrutador"),
-            ("𝐄𝐥𝐢𝐭𝐞", "Elite"),
-            ("𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐝𝐞 𝐅𝐚𝐦𝐫", "Gerente de Família"),
-            ("𝐆𝐞𝐫𝐞𝐧𝐭𝐞 𝐑𝐞𝐜𝐫𝐮𝐭𝐚𝐦𝐞𝐧𝐭𝐨", "Gerente de Recrutamento"),
-            ("𝐌𝐨𝐝𝐞𝐫", "Moderador"),
-            ("𝐀𝐯𝐢𝐚̃𝐨𝐳𝐢𝐧𝐡𝐨", "Aviãozinho"),
-            ("𝐌𝐞𝐦𝐛𝐫𝐨", "Membro"),
-            ("𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞", "Visitante"),
+            ("👑┃OWNER", "Dono"),
+            ("👑┃CEO", "CEO"),
+            ("👑┃Real XIT", "Real XIT"),
+            ("💰┃Doações GANG $", "Doações"),
+            ("👤┃GERENTE", "Gerente"),
+            ("👤┃RESP. ELITE", "Resp. Elite"),
+            ("🎫┃RESP. E-MAIL", "Resp. Email"),
+            ("👤┃ELITE", "Elite"),
+            ("📸┃STREAMER", "Streamer"),
+            ("🚀┃RealXit Booster", "Booster"),
+            ("🫂┃Membro", "Membro"),
+            ("🫱🏻‍🫲🏻┃Parceiro", "Parceiro"),
+            ("⏳┃Team REALXIT", "Team REALXIT"),
+            ("👼🏻┃FILHO DO PROFESSOR", "Filho do Professor"),
         ]
         
         for cargo_nome, desc in cargos_disponiveis:
             options.append(
                 discord.SelectOption(
                     label=cargo_nome,
-                    description=desc,
-                    # Sem emoji para evitar erro
+                    description=desc
                 )
             )
         
@@ -400,29 +423,32 @@ class CargosCog(commands.Cog):
                 "2. Digite @usuário ou ID do FiveM\n"
                 "3. Selecione o cargo\n"
                 "✅ Nickname atualiza automaticamente\n\n"
-                "**📌 Importante:**\n"
-                "• O nickname mantém a primeira parte\n"
-                "• ID do FiveM é preservado após ' - '\n"
+                "**📌 Regras de Nickname:**\n"
+                "• **Cargos ALTOS** (👤┃ELITE pra cima): `CARGO | Nome`\n"
+                "• **Cargos BAIXOS** (👤┃ELITE pra baixo): `CARGO | Nome - ID`\n"
                 "• Apenas staff pode usar"
             ),
             color=discord.Color.blue()
         )
         
-        # Adicionar exemplo com Elite
+        # Adicionar exemplos
         embed.add_field(
             name="🎯 Exemplos de Nickname",
             value=(
-                "• MEM | João - 123456\n"
-                "• GER | Maria - 789012\n"
-                "• ELITE | Pedro - 345678\n"  # ADICIONADO Elite
-                "• AV | Ana - 901234"
+                "**Sem ID (cargos altos):**\n"
+                "• OWNER | João\n"
+                "• GER | Maria\n"
+                "• ELITE | Pedro\n\n"
+                "**Com ID (cargos baixos):**\n"
+                "• MEM | Ana - 26046\n"
+                "• TEAM | Carlos - 12345"
             ),
             inline=False
         )
         
         embed.add_field(
             name="👑 Staff Permitido",
-            value="\n".join(STAFF_ROLES[:6]) + "\n...",
+            value="\n".join(STAFF_ROLES[:5]) + "\n...",
             inline=False
         )
         
