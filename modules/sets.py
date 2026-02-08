@@ -415,7 +415,7 @@ class SetsCog(commands.Cog):
                 "3. Digite seu **Nick do Jogo**\n"
                 "4. Aguarde aprovação da equipe\n\n"
             ),
-            color=discord.Color.purple()  # Mudei para purple para combinar
+            color=discord.Color.red()  
         )
         
         # ADICIONAR GIF GRANDE DENTRO DO MESMO EMBED
