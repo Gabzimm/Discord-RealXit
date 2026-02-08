@@ -7,17 +7,9 @@ import re
 
 # ========== CONFIGURAÇÃO ==========
 STAFF_ROLES = [
-    "👑┃OWNER"
-    "👑┃LIDERANÇA"
-    "👑┃CEO"
-    "🔑┃ACESS"
-    "👑┃Real XIT"
-    "👤┃GERENTE"
-    "👤┃RESP. ELITE"
-    "📍┃RESP. CALL"
-    "📍┃RESP. TICKET"
+    "👑┃OWNER", "👑┃CEO", "👑┃Real XIT", 
+    "👤┃GERENTE", "👤┃RESP. ELITE", 
     "🎫┃RESP. E-MAIL"
-    ":man_technologist:┃RESP. REC"
 ]
 
 # ========== CLASSES DO SISTEMA DE SET ==========
