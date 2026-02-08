@@ -48,8 +48,8 @@ NICKNAME_TEMPLATES = {
 # Cargos que podem usar o sistema (staff)
 STAFF_ROLES = [
     "👑┃OWNER", "👑┃CEO", "👑┃Real XIT", 
-    "💰┃Doações GANG $", "👤┃GERENTE", 
-    "👤┃RESP. ELITE", "🎫┃RESP. E-MAIL"
+    "👤┃GERENTE", "👤┃RESP. ELITE", 
+    "🎫┃RESP. E-MAIL"
 ]
 
 # ========== FUNÇÕES AUXILIARES ==========
