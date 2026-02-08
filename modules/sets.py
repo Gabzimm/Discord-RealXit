@@ -377,59 +377,60 @@ class SetsCog(commands.Cog):
         self.bot.add_view(SetFinalizadoView("", "", 0))
         print("✅ Views de Sets carregadas")
     
-   @commands.command()
-   @commands.has_permissions(administrator=True)
-async def setup_set(self, ctx):
-    """Configura o painel de pedido de set com GIF GRANDE"""
-    
-    # Verificar se canal 'aprovar-set' existe
-    canal_set = discord.utils.get(ctx.guild.text_channels, name="aprovar-set")
-    if not canal_set:
-        embed_aviso = discord.Embed(
-            title="⚠️ ATENÇÃO!",
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def setup_set(self, ctx):
+        """Configura o painel de pedido de set com GIF GRANDE"""
+        
+        # Verificar se canal 'aprovar-set' existe
+        canal_set = discord.utils.get(ctx.guild.text_channels, name="aprovar-set")
+        if not canal_set:
+            embed_aviso = discord.Embed(
+                title="⚠️ ATENÇÃO!",
+                description=(
+                    "O canal **'aprovar-set'** não existe!\n\n"
+                    "**Para criar:**\n"
+                    "1. Crie um canal de texto chamado `aprovar-set`\n"
+                    "2. Configure as permissões para staff\n"
+                    "3. Execute `!setup_set` novamente\n\n"
+                    "**Permissões recomendadas:**\n"
+                    "• Staff: Ver e enviar mensagens\n"
+                    "• Demais: Apenas ver mensagens"
+                ),
+                color=discord.Color.orange()
+            )
+            await ctx.send(embed=embed_aviso)
+            return
+        
+        # Embed com Título, Instruções e GIF GRANDE
+        embed = discord.Embed(
+            title="🎮 **PEÇA SEU SET AQUI!**",
             description=(
-                "O canal **'aprovar-set'** não existe!\n\n"
-                "**Para criar:**\n"
-                "1. Crie um canal de texto chamado `aprovar-set`\n"
-                "2. Configure as permissões para staff\n"
-                "3. Execute `!setup_set` novamente\n\n"
-                "**Permissões recomendadas:**\n"
-                "• Staff: Ver e enviar mensagens\n"
-                "• Demais: Apenas ver mensagens"
+                "Clique no botão abaixo e peça seu\n"
+                "aprovamento para receber seu set\n"
+                "personalizado no servidor.\n\n"
+                "**📌 Instruções:**\n"
+                "1. Clique em **'Peça seu Set!'**\n"
+                "2. Digite seu **ID do Fivem**\n"
+                "3. Digite seu **Nick do Jogo**\n"
+                "4. Aguarde aprovação da equipe\n\n"
+                f"**📋 Pedidos serão enviados para:**\n{canal_set.mention}"
             ),
-            color=discord.Color.orange()
+            color=discord.Color.purple()  # Mudei para purple para combinar
         )
-        await ctx.send(embed=embed_aviso)
-        return
-    
-    # Embed com Título, Instruções e GIF GRANDE
-    embed = discord.Embed(
-        title="🎮 **PEÇA SEU SET AQUI!**",
-        description=(
-            "Clique no botão abaixo e peça seu\n"
-            "aprovamento para receber seu set\n"
-            "personalizado no servidor.\n\n"
-            "**📌 Instruções:**\n"
-            "1. Clique em **'Peça seu Set!'**\n"
-            "2. Digite seu **ID do Fivem**\n"
-            "3. Digite seu **Nick do Jogo**\n"
-            "4. Aguarde aprovação da equipe\n\n"
-        ),
-        color=discord.Color.red()
-    )
-    
-    # ADICIONAR GIF GRANDE DENTRO DO MESMO EMBED
-    embed.set_image(url="https://cdn.discordapp.com/attachments/1421981847201644635/1432382433830895676/IMG_4839.gif?ex=69894cd8&is=6987fb58&hm=1688363f4da42b93d5bb85a2a72373020a3f6acebc40c67d26974e96f9cfaa1a&")
-    
-    embed.set_footer(text="Sistema automático • WaveX")
-    
-    view = SetOpenView()
-    
-    # Enviar TUDO em uma única mensagem
-    await ctx.send(embed=embed, view=view)
-    
-    # Deletar mensagem do comando
-    await ctx.message.delete()
+        
+        # ADICIONAR GIF GRANDE DENTRO DO MESMO EMBED
+        embed.set_image(url="https://cdn.discordapp.com/attachments/1421981847201644635/1432382433830895676/IMG_4839.gif?ex=69894cd8&is=6987fb58&hm=1688363f4da42b93d5bb85a2a72373020a3f6acebc40c67d26974e96f9cfaa1a&")
+        
+        embed.set_footer(text="Sistema automático • WaveX")
+        
+        view = SetOpenView()
+        
+        # Enviar TUDO em uma única mensagem
+        await ctx.send(embed=embed, view=view)
+        
+        # Deletar mensagem do comando
+        await ctx.message.delete()
     
     @commands.command()
     async def check_id(self, ctx, *, fivem_id: str):
