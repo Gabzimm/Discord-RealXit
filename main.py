@@ -68,30 +68,39 @@ async def on_member_join(member: discord.Member):
     print(f"👤 {member.name} entrou no servidor!")
     
     try:
-        # Buscar cargo "𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞"
-        visitante_role = discord.utils.get(member.guild.roles, name="𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞")
+        # Buscar cargo "⏳┃Team REALXIT" (ALTERADO)
+        team_role = discord.utils.get(member.guild.roles, name="⏳┃Team REALXIT")
         
-        if not visitante_role:
-            print("❌ Cargo '𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞' não encontrado!")
+        if not team_role:
+            print("❌ Cargo '⏳┃Team REALXIT' não encontrado!")
             
-            # Tentar criar automaticamente
+            # Tentar criar automaticamente (sem emoji se não conseguir)
             try:
-                visitante_role = await member.guild.create_role(
-                    name="𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞",
-                    color=discord.Color.light_grey(),
+                team_role = await member.guild.create_role(
+                    name="⏳┃Team REALXIT",
+                    color=discord.Color.dark_grey(),
                     reason="Criado automaticamente pelo sistema de boas-vindas"
                 )
-                print(f"✅ Cargo '𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞' criado automaticamente!")
-            except discord.Forbidden:
-                print("❌ Sem permissão para criar cargo!")
-                return
-            except Exception as e:
-                print(f"❌ Erro ao criar cargo: {e}")
-                return
+                print(f"✅ Cargo '⏳┃Team REALXIT' criado automaticamente!")
+            except:
+                try:
+                    # Tentar criar sem emoji
+                    team_role = await member.guild.create_role(
+                        name="Team REALXIT",
+                        color=discord.Color.dark_grey(),
+                        reason="Criado automaticamente pelo sistema de boas-vindas"
+                    )
+                    print(f"✅ Cargo 'Team REALXIT' criado automaticamente!")
+                except discord.Forbidden:
+                    print("❌ Sem permissão para criar cargo!")
+                    return
+                except Exception as e:
+                    print(f"❌ Erro ao criar cargo: {e}")
+                    return
                 
         # Dar o cargo ao membro
-        await member.add_roles(visitante_role)
-        print(f"✅ Cargo '𝐕𝐢𝐬𝐢𝐭𝐚𝐧𝐭𝐞' atribuído a {member.name}")
+        await member.add_roles(team_role)
+        print(f"✅ Cargo '⏳┃Team REALXIT' atribuído a {member.name}")
         
         # Enviar mensagem de boas-vindas
         try:
