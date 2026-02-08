@@ -414,7 +414,6 @@ class SetsCog(commands.Cog):
                 "2. Digite seu **ID do Fivem**\n"
                 "3. Digite seu **Nick do Jogo**\n"
                 "4. Aguarde aprovação da equipe\n\n"
-                f"**📋 Pedidos serão enviados para:**\n{canal_set.mention}"
             ),
             color=discord.Color.purple()  # Mudei para purple para combinar
         )
