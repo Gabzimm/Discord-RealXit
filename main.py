@@ -146,6 +146,7 @@ async def load_cogs():
     cogs = [
         'modules.sets',
         'modules.cargos',
+        'ausencia.py',
     ]
     
     carregados = 0
