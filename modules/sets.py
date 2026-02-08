@@ -8,17 +8,9 @@ import re
 # ========== CONFIGURAÇÃO ==========
 # CORRIGIDO: Adicionadas vírgulas entre os cargos
 STAFF_ROLES = [
-    "👑┃OWNER",                    # Vírgula adicionada
-    "👑┃LIDERANÇA",                # Vírgula adicionada
-    "👑┃CEO",                      # Vírgula adicionada
-    "🔑┃ACESS",                    # Vírgula adicionada
-    "👑┃Real XIT",                 # Vírgula adicionada
-    "👤┃GERENTE",                  # Vírgula adicionada
-    "👤┃RESP. ELITE",              # Vírgula adicionada
-    "📍┃RESP. CALL",               # Vírgula adicionada
-    "📍┃RESP. TICKET",             # Vírgula adicionada
-    "🎫┃RESP. E-MAIL",             # Vírgula adicionada
-    "👨‍💻┃RESP. REC"                 # Corrigido o emoji
+    "👑┃OWNER", "👑┃CEO", "👑┃Real XIT", 
+    "👤┃GERENTE", "👤┃RESP. ELITE", 
+    "🎫┃RESP. E-MAIL"
 ]
 
 # ========== CLASSES DO SISTEMA DE SET ==========
